@@ -1,18 +1,89 @@
 message SaveFile {
-  required int64 magic = 3;
+  enum CardID {
+    IRONCLAD_PROTOTYPE = 262145;
+    IRONCLAD_AUXILIARY = 262147;
+    IRONCLAD_JETPACK = 262148;
+    IRONCLAD_LIGHT = 262149;
+    IRONCLAD_ARMORED = 262150;
+    IRONCLAD_HEAVY = 262151;
+    IRONCLAD_SABOTEUR = 262154;
+    IRONCLAD_OVERPRESSURIZED = 262155;
+    IRONCLAD_EARTHMOVER = 262156;
+    IRONCLAD_CONCEALED = 262157;
+    IRONCLAD_SKIRMISH = 262158;
+    INFANTRY_ZOUAVE = 262159;
+    INFANTRY_VETERAN_RIFLEMAN = 262160;
+    INFANTRY_RIFLEMAN = 262161;
+    INFANTRY_SCOUT = 262163;
+    INFANTRY_RAIDER = 262164;
+    INFANTRY_MINING_ENGINEER = 262165;
+    INFANTRY_MUSKET_MERCENARY = 262167;
+    INFANTRY_LUMBERJACK = 262168;
+    INFANTRY_SHARPSHOOTER = 262169;
+    INFANTRY_FOX_RUNNER = 262171;
+    INFANTRY_ASSAULT_PIONEER = 262173;
+    ARM_TRUMPET = 262176;
+    ARM_CONGREVE_ROCKET = 262177;
+    ARM_IMPROVED_MUSKET = 262178;
+    ARM_RIFLED_MUSKET = 262179;
+    ARM_LIGHT_CANNON = 262180;
+    ARM_PISTOL = 262181;
+    ARM_HEAVY_WRENCH = 262182;
+    ARM_OFFICERS_SABER = 262183;
+    ARM_CAVALRY_SABER = 262184;
+    ARM_MINING_DRILL = 262185;
+    ARM_WOOD_CHIPPER = 262186;
+    ARM_GRAPESHOT_CANNON = 262187;
+    ARM_ARROW_BARRAGE_LAUNCHER = 262189;
+    ARM_TOMAHAWK = 262190;
+    HEAD_BATTLE_FLAG = 262191;
+    HEAD_ZEBULONS_CAT = 262192;
+    HEAD_MKII_UPGRADE_KIT = 262193;
+    HEAD_REDUNDANT_SYSTEMS = 262194;
+    HEAD_SUPPLEMENTAL_ARMOR = 262195;
+    HEAD_CAMOUFLAGE = 262196;
+    TACTIC_MANEUVER = 262197;
+    TACTIC_FIELD_REPAIR = 262198;
+    TACTIC_FULL_STEAM_AHEAD = 262202;
+    TACTIC_TACTICAL_ADVANTAGE = 262203;
+    TACTIC_ARTILLERY_BARRAGE = 262205;
+    TACTIC_LOAD_AT_WILL = 262206;
+    TACTIC_MERCENARY_AMBUSH = 262210;
+    TACTIC_CHAIN_OF_COMMAND = 262212;
+    TACTIC_DYNAMITE = 262214;
+    ARM_CARBINE_MUSKET = 262216;
+    HEAD_SYMBOL_OF_AUTHORITY = 262249;
+    IRONCLAD_INDUSTRIAL = 262262;
+    TACTICE_VIN_VITAE = 262263;
+    ARM_BANJO = 262264;
+    ARM_PLOW = 262265;
+    HEAD_TOP_HAT_AND_MONOCLE = 262267;
+    HEAD_HUNTING_CAP_AND_PIPE = 262268;
+    IRONCLAD_REVISED_PROTOTYPE = 262298;
+    TACTIC_FIELD_ADJUSTMENT = 262299;
+    IRONCLAD_LIGHT_MARCHEUR = 262362;
+    IRONCLAD_RAMPART_MARCHEUR = 262364;
+    INFANTRY_SOUS_LIEUTENANT = 262366;
+    INFANTRY_CANNONEER = 262368;
+    TACTIC_SWIFT_ASSAULT = 262374;
+  }
 
   message Profile {
-    message ID {
-      required int32 id = 1;
-    }
     message Card {
-      required ID id = 1;
+      message Data {
+        required CardID id = 1;
+      }
+      required Data data = 1;
     }
     message Mission {
-      required ID id = 1;
+      message Data {
+        required int32 id = 1;
+      }
+      required Data data = 1;
     }
-
-    optional int32 magic = 1;
+    message Cutscene {
+      required int32 id = 1;
+    }
 
     message Data {
       message UpgradeProgress {
@@ -32,18 +103,18 @@ message SaveFile {
         optional Objective objective = 2 [default = BASIC_WIN];
       }
       message OwnedCard {
-        required ID card = 1;
+        required CardID data = 1;
       }
       message WatchedCutscene {
-        required ID id = 1;
+        required Cutscene data = 1;
       }
-      message DeckWithIndex {
-        message Deck {
+      message Deck {
+        message Data {
           required string name = 1;
           repeated Card card = 2;
         }
         required int32 index = 1;
-        required Deck deck = 2;
+        required Data data = 2;
       }
       message SelectedDeck {
         optional int32 magic = 1;
@@ -59,8 +130,8 @@ message SaveFile {
           TIED = 1;
           WIN = 2;
         }
-        optional Result result = 1;
-        optional int32 count = 2;
+        required Result result = 1;
+        required int32 count = 2;
       }
       message Unknown21 {
         optional int32 magic = 1;
@@ -70,21 +141,24 @@ message SaveFile {
       required uint64 magic = 1;
       repeated UpgradeProgress upgradeProgress = 2;
       repeated MissionCompletion missionCompletion = 3;
-      repeated OwnedCard ownedCard = 4;
-      repeated OwnedCard unknownCard = 5;
+      repeated Card ownedCard = 4;
+      repeated Card unusedCard = 5;
       repeated WatchedCutscene watchedCutscene = 8;
       optional int32 numberOfDecksEverCreated = 9;
-      repeated DeckWithIndex deckWithIndex = 10;
+      repeated Deck deck = 10;
       required SelectedDeck selectedDeck = 11;
       required Unknown14 unknown14 = 14;
       optional int32 unknown15 = 15;
       repeated SkirmishResults skirmish = 16;
-      optional int32 completedCampaign = 20 [default = 0];
+      optional bool completedCampaign = 20 [default = false];
       required Unknown21 unknown21 = 21;
     }
+
+    optional int32 magic = 1;
     optional Data data = 2;
   }
 
+  required int64 magic = 3;
   optional int32 active_profile = 4 [default = 0];
   repeated Profile profile = 5;
 }
