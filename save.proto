@@ -1,0 +1,90 @@
+message SaveFile {
+  required int64 magic = 3;
+
+  message Profile {
+    message ID {
+      required int32 id = 1;
+    }
+    message Card {
+      required ID id = 1;
+    }
+    message Mission {
+      required ID id = 1;
+    }
+
+    optional int32 magic = 1;
+
+    message Data {
+      message UpgradeProgress {
+        required Card card = 1;
+        required int32 progress = 2;
+      }
+      message MissionCompletion {
+        enum Objective {
+          BASIC_WIN = 0;
+          STORY_A = 1;
+          STORY_B = 2;
+          PUZZLE = 3;
+          STORY_C = 5;
+          WAR = 6;
+        }
+        required Mission mission = 1;
+        optional Objective objective = 2 [default = BASIC_WIN];
+      }
+      message OwnedCard {
+        required ID card = 1;
+      }
+      message WatchedCutscene {
+        required ID id = 1;
+      }
+      message DeckWithIndex {
+        message Deck {
+          required string name = 1;
+          repeated Card card = 2;
+        }
+        required int32 index = 1;
+        required Deck deck = 2;
+      }
+      message SelectedDeck {
+        optional int32 magic = 1;
+        optional int32 selected = 2;
+      }
+      message Unknown14 {
+        optional int32 magic = 1;
+        optional int32 unknown = 2;
+      }
+      message SkirmishResults {
+        enum Result {
+          LOSS = 0;
+          TIED = 1;
+          WIN = 2;
+        }
+        optional Result result = 1;
+        optional int32 count = 2;
+      }
+      message Unknown21 {
+        optional int32 magic = 1;
+        optional int32 unknown = 2;
+      }
+
+      required uint64 magic = 1;
+      repeated UpgradeProgress upgradeProgress = 2;
+      repeated MissionCompletion missionCompletion = 3;
+      repeated OwnedCard ownedCard = 4;
+      repeated OwnedCard unknownCard = 5;
+      repeated WatchedCutscene watchedCutscene = 8;
+      optional int32 numberOfDecksEverCreated = 9;
+      repeated DeckWithIndex deckWithIndex = 10;
+      required SelectedDeck selectedDeck = 11;
+      required Unknown14 unknown14 = 14;
+      optional int32 unknown15 = 15;
+      repeated SkirmishResults skirmish = 16;
+      optional int32 completedCampaign = 20 [default = 0];
+      required Unknown21 unknown21 = 21;
+    }
+    optional Data data = 2;
+  }
+
+  optional int32 active_profile = 4 [default = 0];
+  repeated Profile profile = 5;
+}
