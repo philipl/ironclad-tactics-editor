@@ -2,7 +2,9 @@
 
 from gi.repository import Gtk, Gio
 from save_pb2 import SaveFile
+from save_pb2 import _SAVEFILE_CARDID as CardDescriptor
 import struct
+import sys
 
 UI_INFO = """
 <ui>
@@ -24,7 +26,7 @@ class Page():
     self.store = store
     self.buffer = buffer
 
-class MainWindow(Gtk.Window):
+class MainWindow(Gtk.ApplicationWindow):
   def __init__(self, application):
     Gtk.Window.__init__(self, title="Ironclad Tactics Editor",
                         type=Gtk.WindowType.TOPLEVEL)
@@ -109,26 +111,43 @@ class MainWindow(Gtk.Window):
   def build_profile_page(self, notebook, title):
     label = Gtk.Label(title)
 
-    box = Gtk.Box(spacing=6)
+    box = Gtk.Box(spacing=6, orientation=Gtk.Orientation.VERTICAL)
     notebook.append_page(box, label)
 
+    stack = Gtk.Stack()
+    stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+    stack.set_transition_duration(250)
+
+    stackswitcher = Gtk.StackSwitcher()
+    stackswitcher.set_stack(stack)
+    stackswitcher.set_halign(Gtk.Align.CENTER)
+    box.pack_start(stackswitcher, False, False, 0)
+    box.pack_start(stack, True, True, 0)
+
+    scrolledwindow = Gtk.ScrolledWindow()
+    scrolledwindow.set_hexpand(True)
+    scrolledwindow.set_vexpand(True)
+    stack.add_titled(scrolledwindow, "upgrades", "Upgrade progress")
+    
     store = Gtk.ListStore(str, int)
     list = Gtk.TreeView(store)
-    box.pack_start(list, True, True, 0)
+    scrolledwindow.add(list)
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Card", renderer, text=0)
-    column.set_expand(True)	
+    column.set_expand(True)
+    column.set_sort_column_id(0)	
     list.append_column(column)
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Progress", renderer, text=1)
+    column.set_sort_column_id(1)	
     list.append_column(column)
 
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
     scrolledwindow.set_vexpand(True)
-    box.pack_start(scrolledwindow, True, True, 0)
+    stack.add_titled(scrolledwindow, "dump", "Text Dump")
     
     textview = Gtk.TextView()
     textbuffer = textview.get_buffer()
@@ -183,23 +202,33 @@ class MainWindow(Gtk.Window):
       page.buffer.set_text(str(profile))
       page.box.set_sensitive(True)
 
+      page.store.clear()
       for progress in profile.data.upgradeProgress:
-        page.store.append([str(progress.card.data.id),
-                           progress.progress])
+        name = CardDescriptor.values_by_number[progress.card.data.id].name
+        page.store.append([name, progress.progress])
     else:
       page.box.set_sensitive(False)
 
 class EditorApp(Gtk.Application):
   def __init__(self):
-    Gtk.Application.__init__(self, application_id="apps.philipl.ironclad-tactics-editor",
-                             flags=Gio.ApplicationFlags.FLAGS_NONE)
+    Gtk.Application.__init__(self,
+                             application_id="apps.philipl.ironclad-tactics-editor",
+                             flags=Gio.ApplicationFlags.HANDLES_OPEN)
     self.connect("activate", self.on_activate)
+    self.connect("open", self.on_open)
 
   def on_activate(self, data=None):
+    window = MainWindow(self)
+    self.add_window(window)
+    window.show_all()
+
+  def on_open(self, app, files, hint, data=None):
+    for file in files:
       window = MainWindow(self)
+      app.add_window(window)
+      window.load_file(file.get_path())
       window.show_all()
-      self.add_window(window)
-    
+
 if __name__ == "__main__":
   app = EditorApp()
-  app.run(None)
+  app.run(sys.argv)
