@@ -21,9 +21,11 @@ UI_INFO = """
 """
 
 class Page():
-  def __init__(self, box, store, buffer):
+  def __init__(self, box, upgradestore, ownedstore, unusedstore, buffer):
     self.box = box
-    self.store = store
+    self.upgradestore = upgradestore
+    self.ownedstore = ownedstore
+    self.unusedstore = unusedstore
     self.buffer = buffer
 
 class MainWindow(Gtk.ApplicationWindow):
@@ -109,11 +111,13 @@ class MainWindow(Gtk.ApplicationWindow):
     self.notebook.set_sensitive(False)
 
   def build_profile_page(self, notebook, title):
+    # Add notebook page
     label = Gtk.Label(title)
 
     box = Gtk.Box(spacing=6, orientation=Gtk.Orientation.VERTICAL)
     notebook.append_page(box, label)
 
+    # Primary contents is a stack
     stack = Gtk.Stack()
     stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
     stack.set_transition_duration(250)
@@ -124,13 +128,14 @@ class MainWindow(Gtk.ApplicationWindow):
     box.pack_start(stackswitcher, False, False, 0)
     box.pack_start(stack, True, True, 0)
 
+    # Upgrade Progress List
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
     scrolledwindow.set_vexpand(True)
     stack.add_titled(scrolledwindow, "upgrades", "Upgrade progress")
     
-    store = Gtk.ListStore(str, int)
-    list = Gtk.TreeView(store)
+    upgradestore = Gtk.ListStore(str, int)
+    list = Gtk.TreeView(upgradestore)
     scrolledwindow.add(list)
 
     renderer = Gtk.CellRendererText()
@@ -144,6 +149,39 @@ class MainWindow(Gtk.ApplicationWindow):
     column.set_sort_column_id(1)	
     list.append_column(column)
 
+    # Owned Card List
+    scrolledwindow = Gtk.ScrolledWindow()
+    scrolledwindow.set_hexpand(True)
+    scrolledwindow.set_vexpand(True)
+    stack.add_titled(scrolledwindow, "owned", "Owned Cards")
+    
+    ownedstore = Gtk.ListStore(str)
+    list = Gtk.TreeView(ownedstore)
+    scrolledwindow.add(list)
+
+    renderer = Gtk.CellRendererText()
+    column = Gtk.TreeViewColumn("Card", renderer, text=0)
+    column.set_expand(True)
+    column.set_sort_column_id(0)	
+    list.append_column(column)
+
+    # Unused Card List
+    scrolledwindow = Gtk.ScrolledWindow()
+    scrolledwindow.set_hexpand(True)
+    scrolledwindow.set_vexpand(True)
+    stack.add_titled(scrolledwindow, "unused", "Unused Cards")
+    
+    unusedstore = Gtk.ListStore(str)
+    list = Gtk.TreeView(unusedstore)
+    scrolledwindow.add(list)
+
+    renderer = Gtk.CellRendererText()
+    column = Gtk.TreeViewColumn("Card", renderer, text=0)
+    column.set_expand(True)
+    column.set_sort_column_id(0)	
+    list.append_column(column)
+
+    # Text Dump
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
     scrolledwindow.set_vexpand(True)
@@ -154,7 +192,7 @@ class MainWindow(Gtk.ApplicationWindow):
     textbuffer.set_text("Hello World")
     scrolledwindow.add(textview)
 
-    return Page(box, store, textbuffer)
+    return Page(box, upgradestore, ownedstore, unusedstore, textbuffer)
 
   def on_menu_file_quit(self, widget):
     self.application.quit()
@@ -202,10 +240,20 @@ class MainWindow(Gtk.ApplicationWindow):
       page.buffer.set_text(str(profile))
       page.box.set_sensitive(True)
 
-      page.store.clear()
+      page.upgradestore.clear()
       for progress in profile.data.upgradeProgress:
         name = CardDescriptor.values_by_number[progress.card.data.id].name
-        page.store.append([name, progress.progress])
+        page.upgradestore.append([name, progress.progress])
+
+      page.ownedstore.clear()
+      for card in profile.data.ownedCard:
+        name = CardDescriptor.values_by_number[card.data.id].name
+        page.ownedstore.append([name])
+
+      page.unusedstore.clear()
+      for card in profile.data.unusedCard:
+        name = CardDescriptor.values_by_number[card.data.id].name
+        page.unusedstore.append([name])
     else:
       page.box.set_sensitive(False)
 
