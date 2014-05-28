@@ -147,9 +147,6 @@ message SaveFile {
         required Mission mission = 1;
         optional Objective objective = 2 [default = BASIC_WIN];
       }
-      message OwnedCard {
-        required CardID data = 1;
-      }
       message WatchedCutscene {
         required Cutscene data = 1;
       }
