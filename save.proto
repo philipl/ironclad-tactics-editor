@@ -59,7 +59,7 @@ message SaveFile {
     ARM_ASSAULT_SABER = 262250;
     ARM_GATLING_GUN = 262255;
     IRONCLAD_INDUSTRIAL = 262262;
-    TACTICE_VIN_VITAE = 262263;
+    TACTIC_VIN_VITAE = 262263;
     ARM_BANJO = 262264;
     ARM_PLOW = 262265;
     HEAD_TOP_HAT_AND_MONOCLE = 262267;
@@ -199,7 +199,7 @@ message SaveFile {
       required Unknown21 unknown21 = 21;
     }
 
-    optional int32 magic = 1;
+    optional bool present = 1 [default = false];
     optional Data data = 2;
   }
 
