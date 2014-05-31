@@ -8,20 +8,6 @@ from save_pb2 import _SAVEFILE_CUTSCENEID as CutsceneDescriptor
 import struct
 import sys
 
-UI_INFO = """
-<ui>
-  <menubar name='MenuBar'>
-    <menu action='FileMenu'>
-      <menuitem action='FileOpen' />
-      <menuitem action='FileSave' />
-      <menuitem action='FileSaveAs' />
-      <separator/>
-      <menuitem action='FileQuit' />
-    </menu>
-  </menubar>
-</ui>
-"""
-
 class Page():
   def __init__(self, box, upgradestore, ownedstore, unusedstore, buffer):
     self.box = box
@@ -38,45 +24,25 @@ class MainWindow(Gtk.ApplicationWindow):
 
     self.set_default_size(800, 600)
 
+    self.build_menu()
     self.build_window()
 
   def build_menu(self):
-    uimanager = Gtk.UIManager()
-    uimanager.add_ui_from_string(UI_INFO)
-    accelgroup = uimanager.get_accel_group()
-    self.add_accel_group(accelgroup)
+    action = Gio.SimpleAction.new("open", None)
+    action.connect("activate", self.on_file_open)
+    self.add_action(action)
 
-    action_group = Gtk.ActionGroup("actions")
-    uimanager.insert_action_group(action_group)
+    action = Gio.SimpleAction.new("save", None)
+    self.add_action(action)
 
-    action_filemenu = Gtk.Action("FileMenu", "File", None, None)
-    action_group.add_action(action_filemenu)
-
-    action_fileopen = Gtk.Action("FileOpen", None, None, Gtk.STOCK_OPEN)
-    action_fileopen.connect("activate", self.on_file_open)
-    action_group.add_action(action_fileopen)
-
-    action_filesave = Gtk.Action("FileSave", None, None, Gtk.STOCK_SAVE)
-    action_group.add_action(action_filesave)
-
-    action_filesaveas = Gtk.Action("FileSaveAs", None, None, Gtk.STOCK_SAVE_AS)
-    action_group.add_action(action_filesaveas)
-
-    action_filequit = Gtk.Action("FileQuit", None, None, Gtk.STOCK_QUIT)
-    action_filequit.connect("activate", self.on_menu_file_quit)
-    action_group.add_action(action_filequit)
-
-    return uimanager
+    action = Gio.SimpleAction.new("saveas", None)
+    self.add_action(action)
 
   def build_window(self):
     grid = Gtk.Grid()
     self.add(grid)
     grid.set_column_spacing(6)
     grid.set_row_spacing(6)
-
-    uimanager = self.build_menu()
-    menubar = uimanager.get_widget("/MenuBar")
-    grid.attach(menubar, 0, 0, 2, 1)
 
     magiclabel = Gtk.Label()
     magiclabel.set_markup("<b>Magic:</b>")
@@ -391,10 +357,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
     return textbuffer
 
-  def on_menu_file_quit(self, widget):
-    self.application.quit()
-
-  def on_file_open(self, widget):
+  def on_file_open(self, action, data=None):
     dialog = Gtk.FileChooserDialog("Please choose a file", self,
                                    Gtk.FileChooserAction.OPEN,
                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
@@ -484,8 +447,28 @@ class EditorApp(Gtk.Application):
     Gtk.Application.__init__(self,
                              application_id="apps.philipl.ironclad-tactics-editor",
                              flags=Gio.ApplicationFlags.HANDLES_OPEN)
+    self.connect("startup", self.on_startup)
     self.connect("activate", self.on_activate)
     self.connect("open", self.on_open)
+
+  def build_menu(self):
+    filemenu = Gio.Menu()
+    filemenu.append("Open", "win.open")
+    filemenu.append("Save", "win.save")
+    filemenu.append("Save As", "win.saveas")
+    filemenu.append("Quit", "app.quit")
+
+    menu = Gio.Menu()
+    menu.append_submenu("File", filemenu)
+
+    return menu
+
+  def on_startup(self, data=None):
+    action = Gio.SimpleAction.new("quit", None)
+    action.connect("activate", lambda action, data: self.quit())
+    self.add_action(action)
+
+    self.set_menubar(self.build_menu())
 
   def on_activate(self, data=None):
     window = MainWindow(self)
