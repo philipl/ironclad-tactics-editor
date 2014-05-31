@@ -4,6 +4,7 @@ from gi.repository import Gtk, Gio
 from save_pb2 import SaveFile
 from save_pb2 import _SAVEFILE_CARDID as CardDescriptor
 from save_pb2 import _SAVEFILE_PROFILE_DATA_MISSIONCOMPLETION_OBJECTIVE as ObjectiveDescriptor
+from save_pb2 import _SAVEFILE_CUTSCENEID as CutsceneDescriptor
 import struct
 import sys
 
@@ -473,7 +474,7 @@ class MainWindow(Gtk.ApplicationWindow):
         page['unusedstore'].append([name])
       page['scenestore'].clear()
       for scene in profile.data.watchedCutscene:
-        name = str(scene.data.id)
+        name = CutsceneDescriptor.values_by_number[scene.data.id].name
         page['scenestore'].append([name])
     else:
       page['box'].set_sensitive(False)
