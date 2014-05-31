@@ -129,8 +129,149 @@ class MainWindow(Gtk.ApplicationWindow):
     box.pack_start(stackswitcher, False, False, 0)
     box.pack_start(stack, True, True, 0)
 
-    # General Stuff
+    magic, wins, ties, loses, completed, \
+    unknown14, unknown15, unknown21  = self.build_general(stack)
+    upgradestore = self.build_upgrade(stack)
+    missionstore = self.build_missions(stack)
+    ownedstore = self.build_owned(stack)
+    unusedstore = self.build_unused(stack)
+    scenestore = self.build_cutscene(stack)
+    textbuffer = self.build_dump(stack)
 
+    return { 'box': box,
+             'magic': magic,
+             'wins': wins,
+             'ties': ties,
+             'loses': loses,
+             'completed': completed,
+             'unknown14': unknown14,
+             'unknown15': unknown15,
+             'unknown21': unknown21,
+             'upgradestore': upgradestore,
+             'missionstore': missionstore,
+             'ownedstore': ownedstore,
+             'unusedstore': unusedstore,
+             'scenestore': scenestore,
+             'buffer': textbuffer,
+           }
+
+  def build_general(self, stack):
+    # General Stuff
+    grid = Gtk.Grid()
+    stack.add_titled(grid, "general", "General")
+
+    label = Gtk.Label()
+    label.set_markup("<b>Magic:</b>")
+    label.set_justify(Gtk.Justification.RIGHT)
+    label.set_hexpand(False)
+    label.set_halign(Gtk.Align.END)
+    label.set_margin_right(6)
+    grid.attach(label, 0, 0, 1, 1)
+
+    magic = Gtk.Entry()
+    magic.set_editable(False)
+    magic.set_sensitive(False)
+    magic.set_hexpand(True)
+    grid.attach(magic, 1, 0, 1, 1)
+
+    label = Gtk.Label()
+    label.set_markup("<b>Skirmish Wins:</b>")
+    label.set_justify(Gtk.Justification.RIGHT)
+    label.set_hexpand(False)
+    label.set_halign(Gtk.Align.END)
+    label.set_margin_right(6)
+    grid.attach(label, 0, 1, 1, 1)
+
+    wins = Gtk.SpinButton.new_with_range(0, 1000000, 1)
+    wins.set_hexpand(True)
+    wins.set_halign(Gtk.Align.START)
+    grid.attach(wins, 1, 1, 1, 1)
+
+    label = Gtk.Label()
+    label.set_markup("<b>Skirmish Ties:</b>")
+    label.set_justify(Gtk.Justification.RIGHT)
+    label.set_hexpand(False)
+    label.set_halign(Gtk.Align.END)
+    label.set_margin_right(6)
+    grid.attach(label, 0, 2, 1, 1)
+
+    ties = Gtk.SpinButton.new_with_range(0, 1000000, 1)
+    ties.set_hexpand(True)
+    ties.set_halign(Gtk.Align.START)
+    grid.attach(ties, 1, 2, 1, 1)
+
+    label = Gtk.Label()
+    label.set_markup("<b>Skirmish Loses:</b>")
+    label.set_justify(Gtk.Justification.RIGHT)
+    label.set_hexpand(False)
+    label.set_halign(Gtk.Align.END)
+    label.set_margin_right(6)
+    grid.attach(label, 0, 3, 1, 1)
+
+    loses = Gtk.SpinButton.new_with_range(0, 1000000, 1)
+    loses.set_hexpand(True)
+    loses.set_halign(Gtk.Align.START)
+    grid.attach(loses, 1, 3, 1, 1)
+
+    label = Gtk.Label()
+    label.set_markup("<b>Completed Campaign:</b>")
+    label.set_justify(Gtk.Justification.RIGHT)
+    label.set_hexpand(False)
+    label.set_halign(Gtk.Align.END)
+    label.set_margin_right(6)
+    grid.attach(label, 0, 4, 1, 1)
+
+    completed = Gtk.CheckButton()
+    grid.attach(completed, 1, 4, 1, 1)
+
+    separator = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
+    separator.set_margin_left(6)
+    separator.set_margin_right(6)
+    grid.attach(separator, 2, 0, 1, 5)
+
+    label = Gtk.Label()
+    label.set_markup("<b>Unknown14:</b>")
+    label.set_justify(Gtk.Justification.RIGHT)
+    label.set_hexpand(False)
+    label.set_halign(Gtk.Align.END)
+    label.set_margin_right(6)
+    grid.attach(label, 3, 1, 1, 1)
+
+    unknown14 = Gtk.SpinButton.new_with_range(0, 1000000, 1)
+    unknown14.set_hexpand(True)
+    unknown14.set_halign(Gtk.Align.START)
+    grid.attach(unknown14, 4, 1, 1, 1)
+
+    label = Gtk.Label()
+    label.set_markup("<b>Unknown15:</b>")
+    label.set_justify(Gtk.Justification.RIGHT)
+    label.set_hexpand(False)
+    label.set_halign(Gtk.Align.END)
+    label.set_margin_right(6)
+    grid.attach(label, 3, 2, 1, 1)
+
+    unknown15 = Gtk.CheckButton()
+    grid.attach(unknown15, 4, 2, 1, 1)
+
+    label = Gtk.Label()
+    label.set_markup("<b>Unknown21:</b>")
+    label.set_justify(Gtk.Justification.RIGHT)
+    label.set_hexpand(False)
+    label.set_halign(Gtk.Align.END)
+    label.set_margin_right(6)
+    grid.attach(label, 3, 3, 1, 1)
+
+    unknown21 = Gtk.SpinButton.new_with_range(0, 1000000, 1)
+    unknown21.set_hexpand(False)
+    unknown21.set_halign(Gtk.Align.START)
+    grid.attach(unknown21, 4, 3, 1, 1)
+
+    return magic, \
+           wins, ties, loses, \
+           completed, \
+           unknown14, unknown15, unknown21
+
+  def build_upgrade(self, stack):
     # Upgrade Progress List
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
@@ -152,6 +293,9 @@ class MainWindow(Gtk.ApplicationWindow):
     column.set_sort_column_id(1)	
     list.append_column(column)
 
+    return upgradestore
+
+  def build_missions(self, stack):
     # Mission Completion List
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
@@ -173,6 +317,9 @@ class MainWindow(Gtk.ApplicationWindow):
     column.set_sort_column_id(1)	
     list.append_column(column)
 
+    return missionstore
+
+  def build_owned(self, stack):
     # Owned Card List
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
@@ -189,6 +336,9 @@ class MainWindow(Gtk.ApplicationWindow):
     column.set_sort_column_id(0)	
     list.append_column(column)
 
+    return ownedstore
+
+  def build_unused(self, stack):
     # Unused Card List
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
@@ -205,6 +355,9 @@ class MainWindow(Gtk.ApplicationWindow):
     column.set_sort_column_id(0)	
     list.append_column(column)
 
+    return unusedstore
+
+  def build_cutscene(self, stack):
     # Watched Cutscenes
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
@@ -221,6 +374,9 @@ class MainWindow(Gtk.ApplicationWindow):
     column.set_sort_column_id(0)	
     list.append_column(column)
 
+    return scenestore
+
+  def build_dump(self, stack):
     # Text Dump
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
@@ -232,14 +388,7 @@ class MainWindow(Gtk.ApplicationWindow):
     textbuffer.set_text("Hello World")
     scrolledwindow.add(textview)
 
-    return { 'box': box,
-             'upgradestore': upgradestore,
-             'missionstore': missionstore,
-             'ownedstore': ownedstore,
-             'unusedstore': unusedstore,
-             'scenestore': scenestore,
-             'buffer': textbuffer,
-           }
+    return textbuffer
 
   def on_menu_file_quit(self, widget):
     self.application.quit()
@@ -286,6 +435,21 @@ class MainWindow(Gtk.ApplicationWindow):
     if profile.present:
       page['buffer'].set_text(str(profile))
       page['box'].set_sensitive(True)
+
+      page['magic'].set_text(str(profile.data.magic))
+      for result in profile.data.skirmish:
+        if result.result == SaveFile.Profile.Data.SkirmishResults.LOSS:
+          page['loses'].set_value(result.count)
+        elif result.result == SaveFile.Profile.Data.SkirmishResults.TIED:
+          page['ties'].set_value(result.count)
+        elif result.result == SaveFile.Profile.Data.SkirmishResults.WIN:
+          page['wins'].set_value(result.count)
+      page['completed'].set_active(profile.data.completedCampaign)
+      if profile.data.unknown14.present:
+        page['unknown14'].set_value(profile.data.unknown14.unknown)
+      page['unknown15'].set_active(profile.data.unknown15)
+      if profile.data.unknown21.present:
+        page['unknown21'].set_value(profile.data.unknown21.unknown)
 
       page['upgradestore'].clear()
       for progress in profile.data.upgradeProgress:
