@@ -3,6 +3,7 @@
 from gi.repository import Gtk, Gio
 from save_pb2 import SaveFile
 from save_pb2 import _SAVEFILE_CARDID as CardDescriptor
+from save_pb2 import _SAVEFILE_PROFILE_DATA_MISSIONCOMPLETION_OBJECTIVE as ObjectiveDescriptor
 import struct
 import sys
 
@@ -34,7 +35,7 @@ class MainWindow(Gtk.ApplicationWindow):
                         type=Gtk.WindowType.TOPLEVEL)
     self.application = application
 
-    self.set_default_size(640, 360)
+    self.set_default_size(800, 600)
 
     self.build_window()
 
@@ -128,6 +129,8 @@ class MainWindow(Gtk.ApplicationWindow):
     box.pack_start(stackswitcher, False, False, 0)
     box.pack_start(stack, True, True, 0)
 
+    # General Stuff
+
     # Upgrade Progress List
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
@@ -146,6 +149,27 @@ class MainWindow(Gtk.ApplicationWindow):
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Progress", renderer, text=1)
+    column.set_sort_column_id(1)	
+    list.append_column(column)
+
+    # Mission Completion List
+    scrolledwindow = Gtk.ScrolledWindow()
+    scrolledwindow.set_hexpand(True)
+    scrolledwindow.set_vexpand(True)
+    stack.add_titled(scrolledwindow, "missions", "Mission Completion")
+    
+    missionstore = Gtk.ListStore(str, str)
+    list = Gtk.TreeView(missionstore)
+    scrolledwindow.add(list)
+
+    renderer = Gtk.CellRendererText()
+    column = Gtk.TreeViewColumn("Mission", renderer, text=0)
+    column.set_expand(True)
+    column.set_sort_column_id(0)	
+    list.append_column(column)
+
+    renderer = Gtk.CellRendererText()
+    column = Gtk.TreeViewColumn("Objective", renderer, text=1)
     column.set_sort_column_id(1)	
     list.append_column(column)
 
@@ -181,6 +205,22 @@ class MainWindow(Gtk.ApplicationWindow):
     column.set_sort_column_id(0)	
     list.append_column(column)
 
+    # Watched Cutscenes
+    scrolledwindow = Gtk.ScrolledWindow()
+    scrolledwindow.set_hexpand(True)
+    scrolledwindow.set_vexpand(True)
+    stack.add_titled(scrolledwindow, "cutscene", "Watched Cutscenes")
+    
+    scenestore = Gtk.ListStore(str)
+    list = Gtk.TreeView(scenestore)
+    scrolledwindow.add(list)
+
+    renderer = Gtk.CellRendererText()
+    column = Gtk.TreeViewColumn("Cutscene", renderer, text=0)
+    column.set_expand(True)
+    column.set_sort_column_id(0)	
+    list.append_column(column)
+
     # Text Dump
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
@@ -192,7 +232,14 @@ class MainWindow(Gtk.ApplicationWindow):
     textbuffer.set_text("Hello World")
     scrolledwindow.add(textview)
 
-    return Page(box, upgradestore, ownedstore, unusedstore, textbuffer)
+    return { 'box': box,
+             'upgradestore': upgradestore,
+             'missionstore': missionstore,
+             'ownedstore': ownedstore,
+             'unusedstore': unusedstore,
+             'scenestore': scenestore,
+             'buffer': textbuffer,
+           }
 
   def on_menu_file_quit(self, widget):
     self.application.quit()
@@ -237,25 +284,35 @@ class MainWindow(Gtk.ApplicationWindow):
 
   def load_profile(self, page, profile):
     if profile.present:
-      page.buffer.set_text(str(profile))
-      page.box.set_sensitive(True)
+      page['buffer'].set_text(str(profile))
+      page['box'].set_sensitive(True)
 
-      page.upgradestore.clear()
+      page['upgradestore'].clear()
       for progress in profile.data.upgradeProgress:
         name = CardDescriptor.values_by_number[progress.card.data.id].name
-        page.upgradestore.append([name, progress.progress])
+        page['upgradestore'].append([name, progress.progress])
 
-      page.ownedstore.clear()
+      page['missionstore'].clear()
+      for mission in profile.data.missionCompletion:
+        name = str(mission.mission.data.id)
+        objective = ObjectiveDescriptor.values_by_number[mission.objective].name
+        page['missionstore'].append([name, objective])
+
+      page['ownedstore'].clear()
       for card in profile.data.ownedCard:
         name = CardDescriptor.values_by_number[card.data.id].name
-        page.ownedstore.append([name])
+        page['ownedstore'].append([name])
 
-      page.unusedstore.clear()
+      page['unusedstore'].clear()
       for card in profile.data.unusedCard:
         name = CardDescriptor.values_by_number[card.data.id].name
-        page.unusedstore.append([name])
+        page['unusedstore'].append([name])
+      page['scenestore'].clear()
+      for scene in profile.data.watchedCutscene:
+        name = str(scene.data.id)
+        page['scenestore'].append([name])
     else:
-      page.box.set_sensitive(False)
+      page['box'].set_sensitive(False)
 
 class EditorApp(Gtk.Application):
   def __init__(self):
