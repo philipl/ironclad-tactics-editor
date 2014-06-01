@@ -8,14 +8,6 @@ from save_pb2 import _SAVEFILE_CUTSCENEID as CutsceneDescriptor
 import struct
 import sys
 
-class Page():
-  def __init__(self, box, upgradestore, ownedstore, unusedstore, buffer):
-    self.box = box
-    self.upgradestore = upgradestore
-    self.ownedstore = ownedstore
-    self.unusedstore = unusedstore
-    self.buffer = buffer
-
 class MainWindow(Gtk.ApplicationWindow):
   def __init__(self, application):
     Gtk.Window.__init__(self, title="Ironclad Tactics Editor",
@@ -27,12 +19,15 @@ class MainWindow(Gtk.ApplicationWindow):
     self.build_menu()
     self.build_window()
 
+    self.filename = None
+
   def build_menu(self):
     action = Gio.SimpleAction.new("open", None)
     action.connect("activate", self.on_file_open)
     self.add_action(action)
 
     action = Gio.SimpleAction.new("save", None)
+    action.connect("activate", self.on_file_save)
     self.add_action(action)
 
     action = Gio.SimpleAction.new("saveas", None)
@@ -394,6 +389,7 @@ class MainWindow(Gtk.ApplicationWindow):
       self.load_profile(self.profile3, save.profile[3])
 
       self.notebook.set_sensitive(True)
+    self.filename = filename
 
   def load_profile(self, page, profile):
     if profile.present:
@@ -441,6 +437,43 @@ class MainWindow(Gtk.ApplicationWindow):
         page['scenestore'].append([name])
     else:
       page['box'].set_sensitive(False)
+
+  def on_file_save(self, action, data=None):
+    self.save_file(self.filename)
+
+  def save_file(self, filename):
+    save = SaveFile()
+
+    save.magic = int(self.magic.get_text())
+    save.active_profile = int(self.activeprofile.get_value())
+
+    self.save_profile(self.profile0, save.profile.add())
+    self.save_profile(self.profile1, save.profile.add())
+    self.save_profile(self.profile2, save.profile.add())
+    self.save_profile(self.profile3, save.profile.add())
+
+    with open(filename + ".test", "wb") as f:
+      data = save.SerializeToString()
+      f.write(struct.pack('I', len(data)))
+      f.write(data)
+
+  def save_profile(self, page, profile):
+    if page['box'].get_sensitive():
+      profile.data.magic = int(page['magic'].get_text())
+
+      for row in page['upgradestore']:
+        progress = profile.data.upgradeProgress.add()
+        progress.card.data.id = CardDescriptor.values_by_name[row[0]].number
+        progress.progress = row[1]
+
+      for row in page['missionstore']:
+        mission = profile.data.missionCompletion.add()
+        mission.mission.data.id = int(row[0])
+        mission.objective = ObjectiveDescriptor.values_by_name[row[1]].number
+
+      profile.data.selectedDeck.present = False
+      profile.data.unknown14.present = False
+      profile.data.unknown21.present = False
 
 class EditorApp(Gtk.Application):
   def __init__(self):
