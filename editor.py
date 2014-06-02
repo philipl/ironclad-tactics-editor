@@ -92,7 +92,7 @@ class MainWindow(Gtk.ApplicationWindow):
     box.pack_start(stack, True, True, 0)
 
     magic, wins, ties, loses, completed, \
-    unknown14, unknown15, unknown21  = self.build_general(stack)
+    unknown14, instructions, unknown21  = self.build_general(stack)
     upgradestore = self.build_upgrade(stack)
     missionstore = self.build_missions(stack)
     ownedstore = self.build_owned(stack)
@@ -107,7 +107,7 @@ class MainWindow(Gtk.ApplicationWindow):
              'loses': loses,
              'completed': completed,
              'unknown14': unknown14,
-             'unknown15': unknown15,
+             'instructions': instructions,
              'unknown21': unknown21,
              'upgradestore': upgradestore,
              'missionstore': missionstore,
@@ -205,15 +205,15 @@ class MainWindow(Gtk.ApplicationWindow):
     grid.attach(unknown14, 4, 1, 1, 1)
 
     label = Gtk.Label()
-    label.set_markup("<b>Unknown15:</b>")
+    label.set_markup("<b>Hide Instruction Card:</b>")
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
     label.set_margin_right(6)
     grid.attach(label, 3, 2, 1, 1)
 
-    unknown15 = Gtk.CheckButton()
-    grid.attach(unknown15, 4, 2, 1, 1)
+    instructions = Gtk.CheckButton()
+    grid.attach(instructions, 4, 2, 1, 1)
 
     label = Gtk.Label()
     label.set_markup("<b>Unknown21:</b>")
@@ -231,7 +231,7 @@ class MainWindow(Gtk.ApplicationWindow):
     return magic, \
            wins, ties, loses, \
            completed, \
-           unknown14, unknown15, unknown21
+           unknown14, instructions, unknown21
 
   def build_upgrade(self, stack):
     # Upgrade Progress List
@@ -407,7 +407,7 @@ class MainWindow(Gtk.ApplicationWindow):
       page['completed'].set_active(profile.data.completedCampaign)
       if profile.data.unknown14.present:
         page['unknown14'].set_value(profile.data.unknown14.unknown)
-      page['unknown15'].set_active(profile.data.unknown15)
+      page['instructions'].set_active(profile.data.hideInstructionCard)
       if profile.data.unknown21.present:
         page['unknown21'].set_value(profile.data.unknown21.unknown)
 
@@ -431,6 +431,7 @@ class MainWindow(Gtk.ApplicationWindow):
       for card in profile.data.unusedCard:
         name = CardDescriptor.values_by_number[card.data.id].name
         page['unusedstore'].append([name])
+
       page['scenestore'].clear()
       for scene in profile.data.watchedCutscene:
         name = CutsceneDescriptor.values_by_number[scene.data.id].name
@@ -461,6 +462,40 @@ class MainWindow(Gtk.ApplicationWindow):
     if page['box'].get_sensitive():
       profile.data.magic = int(page['magic'].get_text())
 
+      loses = int(page['loses'].get_value())
+      if loses != 0:
+        result = profile.data.skirmish.add()
+        result.result = SaveFile.Profile.Data.SkirmishResults.LOSS
+        result.count = loses
+      ties = int(page['ties'].get_value())
+      if ties != 0:
+        result = profile.data.skirmish.add()
+        result.result = SaveFile.Profile.Data.SkirmishResults.TIED
+        result.count = ties
+      wins = int(page['wins'].get_value())
+      if wins != 0:
+        result = profile.data.skirmish.add()
+        result.result = SaveFile.Profile.Data.SkirmishResults.WIN
+        result.count = wins
+
+      completed = page['completed'].get_active()
+      if completed:
+        profile.data.completedCampaign = True
+
+      unknown14 = int(page['unknown14'].get_value())
+      profile.data.unknown14.present = unknown14 != 0
+      if unknown14 != 0:
+        profile.data.unknown14.unknown = unknown14
+
+      hideInstructionCard = page['instructions'].get_active()
+      if hideInstructionCard:
+        profile.data.hideInstructionCard = True
+
+      unknown21 = int(page['unknown21'].get_value())
+      profile.data.unknown21.present = unknown21 != 0
+      if unknown21 != 0:
+        profile.data.unknown21.unknown = unknown21
+
       for row in page['upgradestore']:
         progress = profile.data.upgradeProgress.add()
         progress.card.data.id = CardDescriptor.values_by_name[row[0]].number
@@ -471,9 +506,19 @@ class MainWindow(Gtk.ApplicationWindow):
         mission.mission.data.id = int(row[0])
         mission.objective = ObjectiveDescriptor.values_by_name[row[1]].number
 
+      for row in page['ownedstore']:
+        card = profile.data.ownedCard.add()
+        card.data.id = CardDescriptor.values_by_name[row[0]].number
+
+      for row in page['unusedstore']:
+        card = profile.data.unusedCard.add()
+        card.data.id = CardDescriptor.values_by_name[row[0]].number
+
+      for row in page['scenestore']:
+        scene = profile.data.watchedCutscene.add()
+        scene.data.id = CutsceneDescriptor.values_by_name[row[0]].number
+
       profile.data.selectedDeck.present = False
-      profile.data.unknown14.present = False
-      profile.data.unknown21.present = False
 
 class EditorApp(Gtk.Application):
   def __init__(self):
