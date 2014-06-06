@@ -238,12 +238,15 @@ message SaveFile {
       repeated WatchedCutscene watchedCutscene = 8;
       optional int32 numberOfDecksEverCreated = 9;
       repeated Deck deck = 10;
-      required SelectedDeck selectedDeck = 11;
-      required Unknown14 unknown14 = 14;
+      // required 
+      repeated SelectedDeck selectedDeck = 11;
+      // required
+      repeated Unknown14 unknown14 = 14;
       optional bool hideInstructionCard = 15 [default = false];
       repeated SkirmishResults skirmish = 16;
       optional bool completedCampaign = 20 [default = false];
-      required Unknown21 unknown21 = 21;
+      // required
+      repeated Unknown21 unknown21 = 21;
     }
 
     optional bool present = 1 [default = false];
