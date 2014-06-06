@@ -98,6 +98,7 @@ class MainWindow(Gtk.ApplicationWindow):
     ownedstore = self.build_owned(stack)
     unusedstore = self.build_unused(stack)
     scenestore = self.build_cutscene(stack)
+    totalDecks, selectedDeck, deckstore, decks = self.build_decks(stack)
     textbuffer = self.build_dump(stack)
 
     return { 'box': box,
@@ -114,6 +115,10 @@ class MainWindow(Gtk.ApplicationWindow):
              'ownedstore': ownedstore,
              'unusedstore': unusedstore,
              'scenestore': scenestore,
+             'totalDecks': totalDecks,
+             'selectedDeck': selectedDeck,
+             'deckstore': deckstore,
+             'decks': decks,
              'buffer': textbuffer,
            }
 
@@ -338,6 +343,84 @@ class MainWindow(Gtk.ApplicationWindow):
 
     return scenestore
 
+  def build_decks(self, stack):
+    # Decks
+    grid = Gtk.Grid()
+    stack.add_titled(grid, "decks", "Decks")
+
+    label = Gtk.Label()
+    label.set_markup("<b>Selected Deck:</b>")
+    label.set_justify(Gtk.Justification.RIGHT)
+    label.set_hexpand(False)
+    label.set_halign(Gtk.Align.END)
+    label.set_margin_right(6)
+    grid.attach(label, 0, 0, 1, 1)
+
+    selected = Gtk.Entry()
+    selected.set_editable(False)
+    selected.set_sensitive(False)
+    selected.set_hexpand(True)
+    selected.set_margin_right(6)
+    grid.attach(selected, 1, 0, 1, 1)
+
+    label = Gtk.Label()
+    label.set_markup("<b>Number of decks ever created:</b>")
+    label.set_justify(Gtk.Justification.RIGHT)
+    label.set_hexpand(False)
+    label.set_halign(Gtk.Align.END)
+    label.set_margin_right(6)
+    grid.attach(label, 2, 0, 1, 1)
+
+    totalDecks = Gtk.Entry()
+    totalDecks.set_editable(False)
+    totalDecks.set_sensitive(False)
+    totalDecks.set_hexpand(True)
+    grid.attach(totalDecks, 3, 0, 1, 1)
+
+    scrolledwindow = Gtk.ScrolledWindow()
+    scrolledwindow.set_hexpand(True)
+    scrolledwindow.set_vexpand(True)
+    scrolledwindow.set_margin_top(6)
+    scrolledwindow.set_margin_left(6)
+    scrolledwindow.set_margin_right(6)
+    scrolledwindow.set_margin_bottom(6)
+    grid.attach(scrolledwindow, 0, 1, 2, 1)
+    
+    deckstore = Gtk.ListStore(str, int)
+    list = Gtk.TreeView(deckstore)
+    scrolledwindow.add(list)
+
+    renderer = Gtk.CellRendererText()
+    column = Gtk.TreeViewColumn("Deck", renderer, text=0)
+    column.set_expand(True)
+    column.set_sort_column_id(0)	
+    list.append_column(column)
+
+    scrolledwindow = Gtk.ScrolledWindow()
+    scrolledwindow.set_hexpand(True)
+    scrolledwindow.set_vexpand(True)
+    scrolledwindow.set_margin_top(6)
+    scrolledwindow.set_margin_left(6)
+    scrolledwindow.set_margin_right(6)
+    scrolledwindow.set_margin_bottom(6)
+    grid.attach(scrolledwindow, 2, 1, 2, 1)
+    
+    cardstore = Gtk.ListStore(str)
+    cardlist = Gtk.TreeView(cardstore)
+    scrolledwindow.add(cardlist)
+
+    renderer = Gtk.CellRendererText()
+    column = Gtk.TreeViewColumn("Card", renderer, text=0)
+    column.set_expand(True)
+    column.set_sort_column_id(0)	
+    cardlist.append_column(column)
+
+    decks = {}
+
+    list.get_selection().connect("changed", self.on_deck_selected, cardstore, decks)
+
+    return totalDecks, selected, deckstore, decks
+
   def build_dump(self, stack):
     # Text Dump
     scrolledwindow = Gtk.ScrolledWindow()
@@ -351,6 +434,25 @@ class MainWindow(Gtk.ApplicationWindow):
     scrolledwindow.add(textview)
 
     return textbuffer
+
+  def on_deck_selected(self, selection, cardstore, decks):
+    if not 'decks' in decks:
+      return
+
+    decks = decks['decks']
+
+    deckstore, i = selection.get_selected()
+    if i is None:
+      return
+
+    index = deckstore[i][1]
+
+    for deck in decks:
+      if deck.index == index:
+        cardstore.clear()
+        for card in deck.data.card:
+          name = CardDescriptor.values_by_number[card.data.id].name
+          cardstore.append([name])
 
   def on_file_open(self, action, data=None):
     dialog = Gtk.FileChooserDialog("Please choose a file", self,
@@ -405,11 +507,11 @@ class MainWindow(Gtk.ApplicationWindow):
         elif result.result == SaveFile.Profile.Data.SkirmishResults.WIN:
           page['wins'].set_value(result.count)
       page['completed'].set_active(profile.data.completedCampaign)
-      if profile.data.unknown14.present:
-        page['unknown14'].set_value(profile.data.unknown14.unknown)
+      if profile.data.unknown14[0].present:
+        page['unknown14'].set_value(profile.data.unknown14[0].unknown)
       page['instructions'].set_active(profile.data.hideInstructionCard)
-      if profile.data.unknown21.present:
-        page['unknown21'].set_value(profile.data.unknown21.unknown)
+      if profile.data.unknown21[0].present:
+        page['unknown21'].set_value(profile.data.unknown21[0].unknown)
 
       page['upgradestore'].clear()
       for progress in profile.data.upgradeProgress:
@@ -436,6 +538,18 @@ class MainWindow(Gtk.ApplicationWindow):
       for scene in profile.data.watchedCutscene:
         name = CutsceneDescriptor.values_by_number[scene.data.id].name
         page['scenestore'].append([name])
+
+      page['totalDecks'].set_text(str(profile.data.numberOfDecksEverCreated))
+      if profile.data.selectedDeck[0].present:
+        page['selectedDeck'].set_text(str(profile.data.selectedDeck[0].selected))
+
+      page['deckstore'].clear()
+      for deck in profile.data.deck:
+        name = deck.data.name
+        page['deckstore'].append([name, deck.index])
+
+      page['decks']['decks'] = profile.data.deck
+
     else:
       page['box'].set_sensitive(False)
 
@@ -460,6 +574,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
   def save_profile(self, page, profile):
     if page['box'].get_sensitive():
+      profile.present = True
       profile.data.magic = int(page['magic'].get_text())
 
       loses = int(page['loses'].get_value())
@@ -483,18 +598,20 @@ class MainWindow(Gtk.ApplicationWindow):
         profile.data.completedCampaign = True
 
       unknown14 = int(page['unknown14'].get_value())
-      profile.data.unknown14.present = unknown14 != 0
+      field = profile.data.unknown14.add()
       if unknown14 != 0:
-        profile.data.unknown14.unknown = unknown14
+        field.present = True
+        field.unknown = unknown14
 
       hideInstructionCard = page['instructions'].get_active()
       if hideInstructionCard:
         profile.data.hideInstructionCard = True
 
       unknown21 = int(page['unknown21'].get_value())
-      profile.data.unknown21.present = unknown21 != 0
+      field = profile.data.unknown21.add()
       if unknown21 != 0:
-        profile.data.unknown21.unknown = unknown21
+        field.present = True
+        field.unknown = unknown21
 
       for row in page['upgradestore']:
         progress = profile.data.upgradeProgress.add()
@@ -504,7 +621,9 @@ class MainWindow(Gtk.ApplicationWindow):
       for row in page['missionstore']:
         mission = profile.data.missionCompletion.add()
         mission.mission.data.id = int(row[0])
-        mission.objective = ObjectiveDescriptor.values_by_name[row[1]].number
+        obj = ObjectiveDescriptor.values_by_name[row[1]].number
+        if obj != 0:
+          mission.objective = obj
 
       for row in page['ownedstore']:
         card = profile.data.ownedCard.add()
@@ -518,7 +637,17 @@ class MainWindow(Gtk.ApplicationWindow):
         scene = profile.data.watchedCutscene.add()
         scene.data.id = CutsceneDescriptor.values_by_name[row[0]].number
 
-      profile.data.selectedDeck.present = False
+      profile.data.numberOfDecksEverCreated = int(page['totalDecks'].get_text())
+
+      selected = page['selectedDeck'].get_text()
+      s = profile.data.selectedDeck.add()
+      if selected != "":
+        s.present = True
+        index = int(selected)
+        if index != 0:
+          s.selected = index
+
+      profile.data.deck.extend(page['decks']['decks'])
 
 class EditorApp(Gtk.Application):
   def __init__(self):
