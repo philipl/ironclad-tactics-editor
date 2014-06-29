@@ -99,7 +99,7 @@ class MainWindow(Gtk.ApplicationWindow):
     unusedstore = self.build_unused(stack)
     scenestore = self.build_cutscene(stack)
     totalDecks, selectedDeck, deckstore, decks = self.build_decks(stack)
-    textbuffer = self.build_dump(stack)
+    #textbuffer = self.build_dump(stack)
 
     return { 'box': box,
              'magic': magic,
@@ -119,7 +119,7 @@ class MainWindow(Gtk.ApplicationWindow):
              'selectedDeck': selectedDeck,
              'deckstore': deckstore,
              'decks': decks,
-             'buffer': textbuffer,
+             #'buffer': textbuffer,
            }
 
   def build_general(self, stack):
@@ -495,7 +495,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
   def load_profile(self, page, profile):
     if profile.present:
-      page['buffer'].set_text(str(profile))
+      #page['buffer'].set_text(str(profile))
       page['box'].set_sensitive(True)
 
       page['magic'].set_text(str(profile.data.magic))
