@@ -92,13 +92,14 @@ class MainWindow(Gtk.ApplicationWindow):
     box.pack_start(stack, True, True, 0)
 
     magic, wins, ties, loses, completed, \
-    unknown14, instructions, unknown21  = self.build_general(stack)
+    unknown14, instructions  = self.build_general(stack)
     upgradestore = self.build_upgrade(stack)
     missionstore = self.build_missions(stack)
     ownedstore = self.build_owned(stack)
     unusedstore = self.build_unused(stack)
     scenestore = self.build_cutscene(stack)
-    totalDecks, selectedDeck, deckstore, decks = self.build_decks(stack)
+    totalDecks, selectedDeck, secondDeck, \
+    deckstore, decks = self.build_decks(stack)
     #textbuffer = self.build_dump(stack)
 
     return { 'box': box,
@@ -109,7 +110,6 @@ class MainWindow(Gtk.ApplicationWindow):
              'completed': completed,
              'unknown14': unknown14,
              'instructions': instructions,
-             'unknown21': unknown21,
              'upgradestore': upgradestore,
              'missionstore': missionstore,
              'ownedstore': ownedstore,
@@ -117,6 +117,7 @@ class MainWindow(Gtk.ApplicationWindow):
              'scenestore': scenestore,
              'totalDecks': totalDecks,
              'selectedDeck': selectedDeck,
+             'secondDeck': secondDeck,
              'deckstore': deckstore,
              'decks': decks,
              #'buffer': textbuffer,
@@ -215,28 +216,15 @@ class MainWindow(Gtk.ApplicationWindow):
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
     label.set_margin_right(6)
-    grid.attach(label, 3, 2, 1, 1)
+    grid.attach(label, 0, 5, 1, 1)
 
     instructions = Gtk.CheckButton()
-    grid.attach(instructions, 4, 2, 1, 1)
-
-    label = Gtk.Label()
-    label.set_markup("<b>Unknown21:</b>")
-    label.set_justify(Gtk.Justification.RIGHT)
-    label.set_hexpand(False)
-    label.set_halign(Gtk.Align.END)
-    label.set_margin_right(6)
-    grid.attach(label, 3, 3, 1, 1)
-
-    unknown21 = Gtk.SpinButton.new_with_range(0, 1000000, 1)
-    unknown21.set_hexpand(False)
-    unknown21.set_halign(Gtk.Align.START)
-    grid.attach(unknown21, 4, 3, 1, 1)
+    grid.attach(instructions, 1, 5, 1, 1)
 
     return magic, \
            wins, ties, loses, \
            completed, \
-           unknown14, instructions, unknown21
+           unknown14, instructions
 
   def build_upgrade(self, stack):
     # Upgrade Progress List
@@ -364,18 +352,33 @@ class MainWindow(Gtk.ApplicationWindow):
     grid.attach(selected, 1, 0, 1, 1)
 
     label = Gtk.Label()
-    label.set_markup("<b>Number of decks ever created:</b>")
+    label.set_markup("<b>Second Deck:</b>")
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
     label.set_margin_right(6)
     grid.attach(label, 2, 0, 1, 1)
 
+    secondDeck = Gtk.Entry()
+    secondDeck.set_editable(False)
+    secondDeck.set_sensitive(False)
+    secondDeck.set_hexpand(True)
+    secondDeck.set_margin_right(6)
+    grid.attach(secondDeck, 3, 0, 1, 1)
+
+    label = Gtk.Label()
+    label.set_markup("<b>Number of decks ever created:</b>")
+    label.set_justify(Gtk.Justification.RIGHT)
+    label.set_hexpand(False)
+    label.set_halign(Gtk.Align.END)
+    label.set_margin_right(6)
+    grid.attach(label, 4, 0, 1, 1)
+
     totalDecks = Gtk.Entry()
     totalDecks.set_editable(False)
     totalDecks.set_sensitive(False)
     totalDecks.set_hexpand(True)
-    grid.attach(totalDecks, 3, 0, 1, 1)
+    grid.attach(totalDecks, 5, 0, 1, 1)
 
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
@@ -403,7 +406,7 @@ class MainWindow(Gtk.ApplicationWindow):
     scrolledwindow.set_margin_left(6)
     scrolledwindow.set_margin_right(6)
     scrolledwindow.set_margin_bottom(6)
-    grid.attach(scrolledwindow, 2, 1, 2, 1)
+    grid.attach(scrolledwindow, 2, 1, 4, 1)
     
     cardstore = Gtk.ListStore(str)
     cardlist = Gtk.TreeView(cardstore)
@@ -419,7 +422,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
     list.get_selection().connect("changed", self.on_deck_selected, cardstore, decks)
 
-    return totalDecks, selected, deckstore, decks
+    return totalDecks, selected, secondDeck, deckstore, decks
 
   def build_dump(self, stack):
     # Text Dump
@@ -510,8 +513,6 @@ class MainWindow(Gtk.ApplicationWindow):
       if profile.data.unknown14[0].present:
         page['unknown14'].set_value(profile.data.unknown14[0].unknown)
       page['instructions'].set_active(profile.data.hideInstructionCard)
-      if profile.data.unknown21[0].present:
-        page['unknown21'].set_value(profile.data.unknown21[0].unknown)
 
       page['upgradestore'].clear()
       for progress in profile.data.upgradeProgress:
@@ -542,6 +543,8 @@ class MainWindow(Gtk.ApplicationWindow):
       page['totalDecks'].set_text(str(profile.data.numberOfDecksEverCreated))
       if profile.data.selectedDeck[0].present:
         page['selectedDeck'].set_text(str(profile.data.selectedDeck[0].selected))
+      if profile.data.secondDeck[0].present:
+        page['secondDeck'].set_text(str(profile.data.secondDeck[0].selected))
 
       page['deckstore'].clear()
       for deck in profile.data.deck:
@@ -607,12 +610,6 @@ class MainWindow(Gtk.ApplicationWindow):
       if hideInstructionCard:
         profile.data.hideInstructionCard = True
 
-      unknown21 = int(page['unknown21'].get_value())
-      field = profile.data.unknown21.add()
-      if unknown21 != 0:
-        field.present = True
-        field.unknown = unknown21
-
       for row in page['upgradestore']:
         progress = profile.data.upgradeProgress.add()
         progress.card.data.id = CardDescriptor.values_by_name[row[0]].number
@@ -644,6 +641,14 @@ class MainWindow(Gtk.ApplicationWindow):
       if selected != "":
         s.present = True
         index = int(selected)
+        if index != 0:
+          s.selected = index
+
+      secondDeck = page['secondDeck'].get_text()
+      s = profile.data.secondDeck.add()
+      if secondDeck != "":
+        s.present = True
+        index = int(secondDeck)
         if index != 0:
           s.selected = index
 
