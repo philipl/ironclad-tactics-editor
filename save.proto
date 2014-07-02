@@ -246,7 +246,7 @@ message SaveFile {
       repeated SkirmishResults skirmish = 16;
       optional bool completedCampaign = 20 [default = false];
       // required
-      repeated Unknown21 unknown21 = 21;
+      repeated SelectedDeck secondDeck = 21;
     }
 
     optional bool present = 1 [default = false];
