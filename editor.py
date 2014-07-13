@@ -497,6 +497,23 @@ class MainWindow(Gtk.ApplicationWindow):
     self.filename = filename
 
   def load_profile(self, page, profile):
+    page['magic'].set_text("")
+    page['loses'].set_value(0)
+    page['ties'].set_value(0)
+    page['wins'].set_value(0)
+    page['completed'].set_active(False)
+    page['unknown14'].set_value(0)
+    page['instructions'].set_active(False)
+    page['upgradestore'].clear()
+    page['missionstore'].clear()
+    page['ownedstore'].clear()
+    page['unusedstore'].clear()
+    page['scenestore'].clear()
+    page['deckstore'].clear()
+    page['totalDecks'].set_text("")
+    page['selectedDeck'].set_text("")
+    page['secondDeck'].set_text("")
+
     if profile.present:
       #page['buffer'].set_text(str(profile))
       page['box'].set_sensitive(True)
@@ -514,28 +531,23 @@ class MainWindow(Gtk.ApplicationWindow):
         page['unknown14'].set_value(profile.data.unknown14[0].unknown)
       page['instructions'].set_active(profile.data.hideInstructionCard)
 
-      page['upgradestore'].clear()
       for progress in profile.data.upgradeProgress:
         name = CardDescriptor.values_by_number[progress.card.data.id].name
         page['upgradestore'].append([name, progress.progress])
 
-      page['missionstore'].clear()
       for mission in profile.data.missionCompletion:
         name = str(mission.mission.data.id)
         objective = ObjectiveDescriptor.values_by_number[mission.objective].name
         page['missionstore'].append([name, objective])
 
-      page['ownedstore'].clear()
       for card in profile.data.ownedCard:
         name = CardDescriptor.values_by_number[card.data.id].name
         page['ownedstore'].append([name])
 
-      page['unusedstore'].clear()
       for card in profile.data.unusedCard:
         name = CardDescriptor.values_by_number[card.data.id].name
         page['unusedstore'].append([name])
 
-      page['scenestore'].clear()
       for scene in profile.data.watchedCutscene:
         name = CutsceneDescriptor.values_by_number[scene.data.id].name
         page['scenestore'].append([name])
@@ -546,7 +558,6 @@ class MainWindow(Gtk.ApplicationWindow):
       if profile.data.secondDeck[0].present:
         page['secondDeck'].set_text(str(profile.data.secondDeck[0].selected))
 
-      page['deckstore'].clear()
       for deck in profile.data.deck:
         name = deck.data.name
         page['deckstore'].append([name, deck.index])
