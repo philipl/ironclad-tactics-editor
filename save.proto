@@ -191,6 +191,7 @@ message SaveFile {
           STORY_A = 1;
           STORY_B = 2;
           PUZZLE = 3;
+          MULTIPLAYER = 4;
           STORY_C = 5;
           WAR = 6;
         }
