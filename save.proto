@@ -226,10 +226,6 @@ message SaveFile {
         required Result result = 1;
         required int32 count = 2;
       }
-      message Unknown21 {
-        optional bool present = 1 [default = false];
-        optional int32 unknown = 2;
-      }
 
       required uint64 magic = 1;
       repeated UpgradeProgress upgradeProgress = 2;
