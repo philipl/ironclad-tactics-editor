@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 Copyright (C) 2014 Philip Langdale
 
@@ -17,6 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 '''
 
+import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gio
 from save_pb2 import SaveFile
 from save_pb2 import _SAVEFILE_CARDID as CardDescriptor
