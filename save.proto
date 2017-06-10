@@ -1,3 +1,5 @@
+syntax = "proto2";
+
 message SaveFile {
   enum CardID {
     IRONCLAD_PROTOTYPE = 262145;
