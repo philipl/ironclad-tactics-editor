@@ -94,7 +94,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
   def build_profile_page(self, notebook, title):
     # Add notebook page
-    label = Gtk.Label(title)
+    label = Gtk.Label(label=title)
 
     box = Gtk.Box(spacing=6, orientation=Gtk.Orientation.VERTICAL)
     notebook.append_page(box, label)
@@ -152,7 +152,7 @@ class MainWindow(Gtk.ApplicationWindow):
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
-    label.set_margin_right(6)
+    label.set_margin_end(6)
     grid.attach(label, 0, 0, 1, 1)
 
     magic = Gtk.Entry()
@@ -166,7 +166,7 @@ class MainWindow(Gtk.ApplicationWindow):
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
-    label.set_margin_right(6)
+    label.set_margin_end(6)
     grid.attach(label, 0, 1, 1, 1)
 
     wins = Gtk.SpinButton.new_with_range(0, 1000000, 1)
@@ -179,7 +179,7 @@ class MainWindow(Gtk.ApplicationWindow):
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
-    label.set_margin_right(6)
+    label.set_margin_end(6)
     grid.attach(label, 0, 2, 1, 1)
 
     ties = Gtk.SpinButton.new_with_range(0, 1000000, 1)
@@ -192,7 +192,7 @@ class MainWindow(Gtk.ApplicationWindow):
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
-    label.set_margin_right(6)
+    label.set_margin_end(6)
     grid.attach(label, 0, 3, 1, 1)
 
     loses = Gtk.SpinButton.new_with_range(0, 1000000, 1)
@@ -205,15 +205,15 @@ class MainWindow(Gtk.ApplicationWindow):
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
-    label.set_margin_right(6)
+    label.set_margin_end(6)
     grid.attach(label, 0, 4, 1, 1)
 
     completed = Gtk.CheckButton()
     grid.attach(completed, 1, 4, 1, 1)
 
     separator = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
-    separator.set_margin_left(6)
-    separator.set_margin_right(6)
+    separator.set_margin_start(6)
+    separator.set_margin_end(6)
     grid.attach(separator, 2, 0, 1, 5)
 
     label = Gtk.Label()
@@ -221,7 +221,7 @@ class MainWindow(Gtk.ApplicationWindow):
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
-    label.set_margin_right(6)
+    label.set_margin_end(6)
     grid.attach(label, 3, 1, 1, 1)
 
     unknown14 = Gtk.SpinButton.new_with_range(0, 1000000, 1)
@@ -234,7 +234,7 @@ class MainWindow(Gtk.ApplicationWindow):
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
-    label.set_margin_right(6)
+    label.set_margin_end(6)
     grid.attach(label, 0, 5, 1, 1)
 
     instructions = Gtk.CheckButton()
@@ -251,20 +251,20 @@ class MainWindow(Gtk.ApplicationWindow):
     scrolledwindow.set_hexpand(True)
     scrolledwindow.set_vexpand(True)
     stack.add_titled(scrolledwindow, "upgrades", "Upgrade progress")
-    
+
     upgradestore = Gtk.ListStore(str, int)
-    list = Gtk.TreeView(upgradestore)
+    list = Gtk.TreeView(model=upgradestore)
     scrolledwindow.add(list)
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Card", renderer, text=0)
     column.set_expand(True)
-    column.set_sort_column_id(0)	
+    column.set_sort_column_id(0)
     list.append_column(column)
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Progress", renderer, text=1)
-    column.set_sort_column_id(1)	
+    column.set_sort_column_id(1)
     list.append_column(column)
 
     return upgradestore
@@ -275,20 +275,20 @@ class MainWindow(Gtk.ApplicationWindow):
     scrolledwindow.set_hexpand(True)
     scrolledwindow.set_vexpand(True)
     stack.add_titled(scrolledwindow, "missions", "Mission Completion")
-    
+
     missionstore = Gtk.ListStore(str, str)
-    list = Gtk.TreeView(missionstore)
+    list = Gtk.TreeView(model=missionstore)
     scrolledwindow.add(list)
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Mission", renderer, text=0)
     column.set_expand(True)
-    column.set_sort_column_id(0)	
+    column.set_sort_column_id(0)
     list.append_column(column)
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Objective", renderer, text=1)
-    column.set_sort_column_id(1)	
+    column.set_sort_column_id(1)
     list.append_column(column)
 
     return missionstore
@@ -299,15 +299,15 @@ class MainWindow(Gtk.ApplicationWindow):
     scrolledwindow.set_hexpand(True)
     scrolledwindow.set_vexpand(True)
     stack.add_titled(scrolledwindow, "owned", "Owned Cards")
-    
+
     ownedstore = Gtk.ListStore(str)
-    list = Gtk.TreeView(ownedstore)
+    list = Gtk.TreeView(model=ownedstore)
     scrolledwindow.add(list)
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Card", renderer, text=0)
     column.set_expand(True)
-    column.set_sort_column_id(0)	
+    column.set_sort_column_id(0)
     list.append_column(column)
 
     return ownedstore
@@ -318,15 +318,15 @@ class MainWindow(Gtk.ApplicationWindow):
     scrolledwindow.set_hexpand(True)
     scrolledwindow.set_vexpand(True)
     stack.add_titled(scrolledwindow, "unused", "Unused Cards")
-    
+
     unusedstore = Gtk.ListStore(str)
-    list = Gtk.TreeView(unusedstore)
+    list = Gtk.TreeView(model=unusedstore)
     scrolledwindow.add(list)
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Card", renderer, text=0)
     column.set_expand(True)
-    column.set_sort_column_id(0)	
+    column.set_sort_column_id(0)
     list.append_column(column)
 
     return unusedstore
@@ -337,15 +337,15 @@ class MainWindow(Gtk.ApplicationWindow):
     scrolledwindow.set_hexpand(True)
     scrolledwindow.set_vexpand(True)
     stack.add_titled(scrolledwindow, "cutscene", "Watched Cutscenes")
-    
+
     scenestore = Gtk.ListStore(str)
-    list = Gtk.TreeView(scenestore)
+    list = Gtk.TreeView(model=scenestore)
     scrolledwindow.add(list)
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Cutscene", renderer, text=0)
     column.set_expand(True)
-    column.set_sort_column_id(0)	
+    column.set_sort_column_id(0)
     list.append_column(column)
 
     return scenestore
@@ -360,14 +360,14 @@ class MainWindow(Gtk.ApplicationWindow):
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
-    label.set_margin_right(6)
+    label.set_margin_end(6)
     grid.attach(label, 0, 0, 1, 1)
 
     selected = Gtk.Entry()
     selected.set_editable(False)
     selected.set_sensitive(False)
     selected.set_hexpand(True)
-    selected.set_margin_right(6)
+    selected.set_margin_end(6)
     grid.attach(selected, 1, 0, 1, 1)
 
     label = Gtk.Label()
@@ -375,14 +375,14 @@ class MainWindow(Gtk.ApplicationWindow):
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
-    label.set_margin_right(6)
+    label.set_margin_end(6)
     grid.attach(label, 2, 0, 1, 1)
 
     secondDeck = Gtk.Entry()
     secondDeck.set_editable(False)
     secondDeck.set_sensitive(False)
     secondDeck.set_hexpand(True)
-    secondDeck.set_margin_right(6)
+    secondDeck.set_margin_end(6)
     grid.attach(secondDeck, 3, 0, 1, 1)
 
     label = Gtk.Label()
@@ -390,7 +390,7 @@ class MainWindow(Gtk.ApplicationWindow):
     label.set_justify(Gtk.Justification.RIGHT)
     label.set_hexpand(False)
     label.set_halign(Gtk.Align.END)
-    label.set_margin_right(6)
+    label.set_margin_end(6)
     grid.attach(label, 4, 0, 1, 1)
 
     totalDecks = Gtk.Entry()
@@ -403,38 +403,38 @@ class MainWindow(Gtk.ApplicationWindow):
     scrolledwindow.set_hexpand(True)
     scrolledwindow.set_vexpand(True)
     scrolledwindow.set_margin_top(6)
-    scrolledwindow.set_margin_left(6)
-    scrolledwindow.set_margin_right(6)
+    scrolledwindow.set_margin_start(6)
+    scrolledwindow.set_margin_end(6)
     scrolledwindow.set_margin_bottom(6)
     grid.attach(scrolledwindow, 0, 1, 2, 1)
-    
+
     deckstore = Gtk.ListStore(str, int)
-    list = Gtk.TreeView(deckstore)
+    list = Gtk.TreeView(model=deckstore)
     scrolledwindow.add(list)
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Deck", renderer, text=0)
     column.set_expand(True)
-    column.set_sort_column_id(0)	
+    column.set_sort_column_id(0)
     list.append_column(column)
 
     scrolledwindow = Gtk.ScrolledWindow()
     scrolledwindow.set_hexpand(True)
     scrolledwindow.set_vexpand(True)
     scrolledwindow.set_margin_top(6)
-    scrolledwindow.set_margin_left(6)
-    scrolledwindow.set_margin_right(6)
+    scrolledwindow.set_margin_start(6)
+    scrolledwindow.set_margin_end(6)
     scrolledwindow.set_margin_bottom(6)
     grid.attach(scrolledwindow, 2, 1, 4, 1)
-    
+
     cardstore = Gtk.ListStore(str)
-    cardlist = Gtk.TreeView(cardstore)
+    cardlist = Gtk.TreeView(model=cardstore)
     scrolledwindow.add(cardlist)
 
     renderer = Gtk.CellRendererText()
     column = Gtk.TreeViewColumn("Card", renderer, text=0)
     column.set_expand(True)
-    column.set_sort_column_id(0)	
+    column.set_sort_column_id(0)
     cardlist.append_column(column)
 
     decks = {}
@@ -449,7 +449,7 @@ class MainWindow(Gtk.ApplicationWindow):
     scrolledwindow.set_hexpand(True)
     scrolledwindow.set_vexpand(True)
     stack.add_titled(scrolledwindow, "dump", "Text Dump")
-    
+
     textview = Gtk.TextView()
     textbuffer = textview.get_buffer()
     textbuffer.set_text("Hello World")
@@ -477,10 +477,15 @@ class MainWindow(Gtk.ApplicationWindow):
           cardstore.append([name])
 
   def on_file_open(self, action, data=None):
-    dialog = Gtk.FileChooserDialog("Please choose a file", self,
-                                   Gtk.FileChooserAction.OPEN,
-                                   (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                                   Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+    dialog = Gtk.FileChooserDialog(title="Please choose a file",
+                                   parent=self,
+                                   action=Gtk.FileChooserAction.OPEN)
+    dialog.add_buttons(
+        Gtk.STOCK_CANCEL,
+        Gtk.ResponseType.CANCEL,
+        Gtk.STOCK_OPEN,
+        Gtk.ResponseType.OK,
+    )
 
     filter = Gtk.FileFilter()
     filter.set_name("Save Games")
